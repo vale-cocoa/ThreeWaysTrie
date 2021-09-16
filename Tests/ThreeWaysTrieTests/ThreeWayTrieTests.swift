@@ -21,34 +21,8 @@
 import XCTest
 @testable import ThreeWaysTrie
 
-final class ThreeWaysTrieTests: XCTestCase {
-    var sut: ThreeWaysTrie<Int>!
-    
-    override func setUp() {
-        super.setUp()
-        
-        sut = ThreeWaysTrie()
-    }
-    
-    override func tearDown() {
-        sut = nil
-        
-        super.tearDown()
-    }
-    
-    // MARK: - When
-    func whenRootIsNotNil() {
-        let key = "shells"
-        sut.root = sut._put(node: sut.root, key: key, value: 1, index: key.startIndex, uniquingKeysWith: { _, _ in fatalError() })
-    }
-    
-    func whenIsNotEmpty() {
-        for (value, key) in givenKeys().enumerated() {
-            sut.root = sut._put(node: sut.root, key: key, value: value, index: key.startIndex, uniquingKeysWith: { _, latest in latest })
-        }
-    }
-    
-    // MARK: - Tests
+final class ThreeWaysTrieTests: BaseTrieTestClass {
+    // MARK: - init tests
     func testInit() {
         sut = ThreeWaysTrie()
         
@@ -78,12 +52,12 @@ final class ThreeWaysTrieTests: XCTestCase {
         let cp = sut!
         
         sut._makeUnique()
-        XCTAssertFalse(sut.root === cp.root)
-        XCTAssertEqual(sut.root, cp.root)
+        assertAreEqualNodesButNotSameInstance(lhs: sut.root, rhs: cp.root)
     }
     
     // MARK: - keys(with:) tests
-    func testKeysWith_whenIsEmpty_thenReturnsEmptyArray() {
+    func testKeysWith_whenIsEmpty_thenReturnsEmptyArray() throws {
+        try XCTSkipIf(sut.root != nil, "Trie must be empty for this test")
         let result = sut.keys(with: "")
         XCTAssertTrue(result.isEmpty)
     }
@@ -126,8 +100,139 @@ final class ThreeWaysTrieTests: XCTestCase {
     func testKeysWith_whenIsNotEmptyAndNoKeysInTrieHasSpecifiedPrefix_thenReturnsEmptyArray() {
         whenIsNotEmpty()
         let prefix = "qu"
+        
         let result = sut.keys(with: prefix)
         XCTAssertTrue(result.isEmpty)
+    }
+    
+    // MARK: - keys(matching:) tests
+    func testKeysMatching_whenIsEmtpy_thenReturnsEmptyArray() throws {
+        try XCTSkipIf(sut.root != nil, "Trie must be empty for this test")
+        
+        let result = sut.keys(matching: "...")
+        XCTAssertTrue(result.isEmpty)
+    }
+    
+    func testKeysMatching_whenPatternIsEmpty_thenReturnsEmptyArray() throws {
+        try XCTSkipIf(sut.root != nil, "Trie must be empty for this test")
+        
+        var result = sut.keys(matching: "")
+        XCTAssertTrue(result.isEmpty)
+        
+        whenIsNotEmpty()
+        result = sut.keys(matching: "")
+        XCTAssertTrue(result.isEmpty)
+    }
+    
+    func testKeysMatching_whenIsNotEmptyAndPatternIsNotEmptyAndMatchesOneKey_thenReturnsArrayContainingSuchKey() {
+        whenIsNotEmpty()
+        let pattern = "she"
+        var expectedResult: Array<String> = []
+        sut.root?._preOrderVisit({ stop, key, node in
+            guard
+                node.value != nil
+            else { return }
+            
+            if key == pattern {
+                expectedResult.append(key)
+                stop = true
+            }
+        })
+        
+        let result = sut.keys(matching: pattern)
+        XCTAssertEqual(result, expectedResult)
+    }
+    
+    func testKeysMatching_whenIsNotEmptyAndPatternContainsWildCardsAndMatchesSomeKeys_thenReturnsArrayWithSuchKeys() {
+        whenIsNotEmpty()
+        let pattern = "s........"
+        var expectedResult: Array<String> = []
+        sut._forEach(node: sut.root, body: {
+            guard
+                $0.key.count == pattern.count,
+                $0.key.first == pattern.first
+            else { return }
+            
+            expectedResult.append($0.key)
+        })
+        
+        let result = sut.keys(matching: pattern)
+        XCTAssertEqual(result, expectedResult)
+    }
+    
+    func testKeysMatching_whenIsNotEmptyAndPatternIsNotEmptyAndNoKeyMatchesPattern_thenReturnsEmptyArray() {
+        whenIsNotEmpty()
+        let pattern = "she.."
+        
+        let result = sut.keys(matching: pattern)
+        XCTAssertTrue(result.isEmpty)
+    }
+    
+    // MARK: - rank(_:) tests
+    
+    // MARK: - floor(_:) tests
+    
+    // MARK: - ceiling(_:) tests
+    
+    // MARK: - Equatable conformance tests
+    func testEquatable() {
+        // when both have nil root, then returns true:
+        var lhs = ThreeWaysTrie<Int>()
+        var rhs = lhs
+        XCTAssertEqual(lhs, rhs)
+        
+        // when one has nil root and other has root instance, then returns false
+        whenIsNotEmpty()
+        lhs.root = sut.root
+        XCTAssertNotEqual(lhs, rhs)
+        
+        // when both shares same root instance, then returns true
+        rhs.root = lhs.root
+        XCTAssertEqual(lhs, rhs)
+        
+        // when have different root instances but root instances are equal,
+        // then returns true:
+        rhs.root = sut.root?._clone()
+        XCTAssertFalse(lhs.root === rhs.root)
+        XCTAssertEqual(lhs, rhs)
+        
+        // when have different root instances and root instances are not equal,
+        // then returns false
+        let newKey = "cheap"
+        rhs.root = rhs._put(node: rhs.root, key: newKey, value: 1000, index: newKey.startIndex, uniquingKeysWith: { _ , latest in latest })
+        XCTAssertNotEqual(lhs, rhs)
+    }
+    
+    // MARK: - Hashable conformance tests
+    func testHashable() {
+        // As usual we use a Swift Set for testing Hashable conformance:
+        var set: Set<ThreeWaysTrie<Int>> = []
+        
+        // when root is nil, resolve to same hash:
+        set.insert(sut)
+        var other = ThreeWaysTrie<Int>()
+        XCTAssertFalse(set.insert(other).inserted)
+        
+        // when root is not nil, resolve to a different hash than one with nil root:
+        whenIsNotEmpty()
+        XCTAssertTrue(set.insert(sut).inserted)
+        
+        // when root is same instance resolves to same hash
+        set.removeAll()
+        set.insert(sut)
+        other.root = sut.root
+        XCTAssertFalse(set.insert(other).inserted)
+        
+        // when root is different instance but equal to other root,
+        // then resolves to same hash:
+        other.root = sut.root?._clone()
+        XCTAssertFalse(set.insert(other).inserted)
+        
+        // when root instance is not equal to other root instance,
+        // then resolves to different hash:
+        let newKey = "newkey"
+        other.root = other._put(node: other.root, key: newKey, value: Int.random(in: 1...10), index: newKey.startIndex, uniquingKeysWith: { _, latest in latest })
+        XCTAssertTrue(set.insert(other).inserted)
     }
     
 }

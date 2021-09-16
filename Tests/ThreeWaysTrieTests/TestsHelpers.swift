@@ -23,8 +23,15 @@ import XCTest
 
 let someError = NSError(domain: "com.vdl.threewaystrie", code: 1, userInfo: nil)
 
+fileprivate let malformedJSON: [String : Any] = [
+    "char" : "" as Any,
+    "value" : 1 as Any,
+    "count" : 1 as Any,
+]
+
 func givenKeys() -> Array<String> {
-    let phrase = "she sells seashells by the seashore"
+    //let phrase = "she sells seashells by the seashore"
+    let phrase = "she sells seashells by the shoreline"
     
     return phrase.components(separatedBy: " ")
 }
@@ -37,7 +44,7 @@ func assertAreEqualNodesButNotSameInstance<Value>(lhs: ThreeWaysTrie<Value>.Node
         guard
             l !== r
         else {
-            XCTFail("Same istance", file: file, line: line)
+            XCTFail("Nodes are same istance", file: file, line: line)
             return
         }
         
@@ -45,15 +52,13 @@ func assertAreEqualNodesButNotSameInstance<Value>(lhs: ThreeWaysTrie<Value>.Node
             l.char == r.char,
             l.value == r.value,
             l.count == r.count
-        else {
-            XCTFail("Not equal", file: file, line: line)
-            return
-        }
+        else { fallthrough }
+        
         assertAreEqualNodesButNotSameInstance(lhs: l.left, rhs: r.left, file: file, line: line)
         assertAreEqualNodesButNotSameInstance(lhs: l.mid, rhs: r.mid, file: file, line: line)
         assertAreEqualNodesButNotSameInstance(lhs: l.right, rhs: r.right, file: file, line: line)
         
-    default: XCTFail("Not equal", file: file, line: line)
+    default: XCTFail("Nodes are not equal", file: file, line: line)
     }
 }
 
@@ -72,4 +77,77 @@ func assertCountValuesAreValid<Value>(root: ThreeWaysTrie<Value>.Node?, file: St
     assertCountValuesAreValid(root: n.left, file: file, line: line)
     assertCountValuesAreValid(root: n.mid, file: file, line: line)
     assertCountValuesAreValid(root: n.right, file: file, line: line)
+}
+
+func assertAreEqualNodes<Value>(lhs: ThreeWaysTrie<Value>.Node?, rhs: ThreeWaysTrie<Value>.Node?, file: StaticString = #file, line: UInt = #line, message: String? = nil) where Value: Equatable {
+    guard
+        lhs !== rhs
+    else { return }
+    
+    var msg = "Nodes are not equal:\n"
+    let prevMsg = (message != nil ? " – \(message!)\n" : "")
+    switch (lhs, rhs) {
+    case (nil, nil): return
+    case (.some(let l), .some(let r)):
+        guard
+            l.char == r.char,
+            l.count == r.count,
+            l.value == r.value
+        else {
+            msg += "lhs.char: \(l.char) — rhs.char: \(r.char)\n"
+            msg += "lhs.count: \(l.count) - rhs.count\(r.count)\n"
+            msg += "lhs.value: \(String(describing: l.value)) - rhs.value: \(String(describing: r.value))\n"
+            msg += prevMsg
+            fallthrough
+        }
+        
+        assertAreEqualNodes(lhs: l.left, rhs: r.left, file: file, line: line, message: msg + "Nodes' lefts are not equal.\n" + prevMsg)
+        assertAreEqualNodes(lhs: l.mid, rhs: r.mid, file: file, line: line, message: msg + "Nodes' mids are not equal\n" + prevMsg)
+        assertAreEqualNodes(lhs: l.right, rhs: r.right, file: file, line: line, message: msg + "Nodes' rights are not equal\n" + prevMsg)
+    default: XCTFail(msg, file: file, line: line)
+    }
+}
+
+internal class BaseTrieTestClass: XCTestCase {
+    var sut: ThreeWaysTrie<Int>!
+    
+    override func setUp() {
+        super.setUp()
+        
+        sut = ThreeWaysTrie()
+    }
+    
+    override func tearDown() {
+        sut = nil
+        
+        super.tearDown()
+    }
+    
+    // MARK: - When
+    func whenRootIsNotNil() {
+        let key = "shells"
+        sut.root = sut._put(node: sut.root, key: key, value: 1, index: key.startIndex, uniquingKeysWith: { _, latest in latest })
+    }
+    
+    func whenIsNotEmpty() {
+        for (value, key) in givenKeys().enumerated() {
+            sut.root = sut._put(node: sut.root, key: key, value: value, index: key.startIndex, uniquingKeysWith: { _, latest in latest })
+        }
+    }
+    
+}
+
+final class WrappedValue: NSCopying {
+    var value: NSArray
+    
+    init(_ value: Array<Any>) {
+        self.value = value as NSArray
+    }
+    
+    func copy(with zone: NSZone? = nil) -> Any {
+        let clone = WrappedValue(value.copy(with: zone) as! Array)
+        
+        return clone
+    }
+    
 }

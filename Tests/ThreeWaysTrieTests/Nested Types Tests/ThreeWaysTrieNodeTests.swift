@@ -215,155 +215,7 @@ final class ThreeWaysTrieNodeTests: XCTestCase {
         sut._updateCount()
         XCTAssertLessThan(sut.count, prevCount)
     }
-    
-    // MARK: - Equatable conformance tests
-    func testEqualWhenSameInstance_thenReturnsTrue() {
-        let rhs = sut!
-        XCTAssertTrue(sut === rhs)
-        XCTAssertEqual(sut, rhs)
-    }
-    
-    func testEqual_whenDifferentInstancesAndSubNodesAreAllNil_thenReturnsAccordinglyToCharValueAndCountEquality() {
-        sut.value = 1
-        sut.count = 1
-        var rhs = Node(char: sut.char)
-        XCTAssertFalse(sut === rhs)
-        rhs.value = sut.value
-        rhs.count = sut.count
         
-        // when char, value and count are equal, then returns true
-        XCTAssertEqual(sut, rhs)
-        
-        // when value are different, then returns false
-        rhs.value! += 1
-        XCTAssertNotEqual(sut, rhs)
-        
-        // when count are different, then returns false
-        rhs.value = sut.value
-        rhs.count += 1
-        XCTAssertNotEqual(sut, rhs)
-        
-        // when char are different, then returns false
-        sut = Node(char: Character(Unicode.Scalar(UInt8.random(in: 0..<128))))
-        sut.value = Int.random(in: 0..<10)
-        sut.count = Int.random(in: 0..<10)
-        rhs = Node(char: Character(Unicode.Scalar(UInt8.random(in: 128...UInt8.max))))
-        sut.value = Int.random(in: 1...100)
-        rhs.value = sut.value
-        sut.count = Int.random(in: 0..<100)
-        rhs.count = sut.count
-        XCTAssertNotEqual(sut, rhs)
-    }
-    
-    func testEqual_whenDifferentInstancesAndCharValueAndCountAreEqual_thenReturnsAccordinglyToLeftMidAndRightValues() {
-        let subNodeA = Node(char: Character(Unicode.Scalar(UInt8.random(in: 0..<128))))
-        let subNodeB = Node(char: Character(Unicode.Scalar(UInt8.random(in: 128...UInt8.max))))
-        let rhs = Node(char: sut.char)
-        
-        // when left are equal, then returns true
-        sut.left = subNodeA
-        rhs.left = subNodeA
-        XCTAssertEqual(sut, rhs)
-        
-        // when either left is nil and other left is not nil, then returns false
-        sut.left = nil
-        XCTAssertNotEqual(sut, rhs)
-        sut.left = subNodeB
-        rhs.left = nil
-        XCTAssertNotEqual(sut, rhs)
-        
-        // when left are not equal, then returns false
-        rhs.left = subNodeA
-        XCTAssertNotEqual(sut, rhs)
-        
-        // when left are same and mid are same, then returns true
-        sut.left = subNodeA
-        sut.mid = subNodeB
-        rhs.mid = subNodeB
-        XCTAssertEqual(sut, rhs)
-        
-        // when left are same, either mid is nil and other mid is not nil, then returns false
-        sut.mid = nil
-        XCTAssertNotEqual(sut, rhs)
-        sut.mid = subNodeA
-        rhs.mid = nil
-        XCTAssertNotEqual(sut, rhs)
-        
-        // when left are equal, mid are not equal, then returns false
-        rhs.mid = subNodeB
-        XCTAssertNotEqual(sut, rhs)
-        
-        // when left are same, mid are same, and right are same, then returns true
-        sut.mid = subNodeB
-        sut.right = subNodeA
-        rhs.right = subNodeA
-        XCTAssertEqual(sut, rhs)
-        
-        // when left are same, mid are same, either right is nil and
-        // other right is not nil, then returns false
-        sut.right = nil
-        XCTAssertNotEqual(sut, rhs)
-        sut.right = subNodeA
-        rhs.right = nil
-        XCTAssertNotEqual(sut, rhs)
-    }
-    
-    // MARK: - Hashable conformance
-    func testHashable() {
-        // We use a swift Set to check for hashable conformance
-        var set: Set<Node> = []
-        let firstKeys = givenKeys()
-        let otherKeys = firstKeys + ["at", "low", "cost"]
-        try! whenContainsKeys(from: firstKeys)
-        set.insert(sut)
-        
-        // Attempting to insert the same instance fails
-        var other = sut!
-        XCTAssertFalse(set.insert(other).inserted)
-        
-        // As well as attempting a copy of it
-        other = sut._clone()
-        XCTAssertFalse(set.insert(other).inserted)
-        
-        // Inserting another one which is different from the one already in set,
-        // succeeds
-        try! whenContainsKeys(from: otherKeys)
-        XCTAssertTrue(set.insert(sut).inserted)
-        
-        // Attempting to insert a copy of it fails:
-        other = sut._clone()
-        XCTAssertFalse(set.insert(other).inserted)
-    }
-    
-    // MARK: - Codable conformance
-    func testEncodeThanDecode() {
-        try! whenContainsKeys(from: givenKeys())
-        
-        do {
-            let encoder = JSONEncoder()
-            let decoder = JSONDecoder()
-            let data = try encoder.encode(sut)
-            let decoded = try decoder.decode(Node.self, from: data)
-            assertAreEqualNodesButNotSameInstance(lhs: sut, rhs: decoded)
-        } catch {
-            XCTFail("Thrown error while encoding/decoding: \(error.localizedDescription)")
-        }
-    }
-    
-    func testDecode_whenMalformedJSON_thenThrowsError() throws {
-        guard
-            let data = try? JSONSerialization.data(withJSONObject: malformedJSON, options: .prettyPrinted)
-        else { throw XCTSkip("Couldn't create JSON data from: \(malformedJSON)") }
-        
-        let decoder = JSONDecoder()
-        do {
-            let _ = try decoder.decode(Node.self, from: data)
-            XCTFail("Didn't throw error")
-        } catch {
-            XCTAssertEqual(ThreeWaysTrie<Int>.Node.Error.emptyCharacter as NSError, error as NSError)
-        }
-    }
-    
     // MARK: - Traversals Tests
     func testTraversals_whenBodyThrows_thenRethrows() {
         let body: (inout Bool, String, Node) throws -> Void = { _, _, _ in throw someError }
@@ -502,7 +354,7 @@ final class ThreeWaysTrieNodeTests: XCTestCase {
     func testPreOrderVisit_traversesNodesInPreOrder() {
         let keys = givenKeys()
         try! whenContainsKeys(from: keys)
-        let expectedResult = ["she", "sells", "seashells", "seashore", "by", "the"]
+        let expectedResult = ["she", "shoreline", "sells", "seashells", "by", "the"]
         var result: Array<String> = []
         sut._preOrderVisit() { _, prefix, node in
             guard
@@ -582,24 +434,5 @@ final class ThreeWaysTrieNodeTests: XCTestCase {
     
 }
 
-// MARK: - Helpers
-fileprivate final class WrappedValue: NSCopying {
-    var value: NSArray
-    
-    init(_ value: Array<Any>) {
-        self.value = value as NSArray
-    }
-    
-    func copy(with zone: NSZone? = nil) -> Any {
-        let clone = WrappedValue(value.copy(with: zone) as! Array)
-        
-        return clone
-    }
-    
-}
 
-fileprivate let malformedJSON: [String : Any] = [
-    "char" : "" as Any,
-    "value" : 1 as Any,
-    "count" : 1 as Any,
-]
+

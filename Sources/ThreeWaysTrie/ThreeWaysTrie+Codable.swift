@@ -19,7 +19,6 @@
 //
 
 import Foundation
-import WebAPICodingOptions
 
 extension ThreeWaysTrie: Codable where Value: Codable {
     public enum Error: Swift.Error {
@@ -49,41 +48,27 @@ extension ThreeWaysTrie: Codable where Value: Codable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        if let codingOptions = decoder.userInfo[WebAPICodingOptions.key] as? WebAPICodingOptions {
-            switch codingOptions.version {
-            case .v1:
-                for codingKey in container.allKeys {
-                    guard
-                        !codingKey.stringValue.isEmpty
-                    else { throw Error.emptyKey }
-                    
-                    let value = try container.decode(Value.self, forKey: codingKey)
-                    self.root = try self._put(node: self.root, key: codingKey.stringValue, value: value, index: codingKey.stringValue.startIndex, uniquingKeysWith: { _, _ in throw Error.duplicateKey})
-                }
-            }
-        } else {
-            self.root = try container.decodeIfPresent(Node.self, forKey: CodingKeys.rootKey)
+        for codingKey in container.allKeys {
+            guard
+                !codingKey.stringValue.isEmpty
+            else { throw Error.emptyKey }
+            
+            let value = try container.decode(Value.self, forKey: codingKey)
+            self.root = try self._put(node: self.root, key: codingKey.stringValue, value: value, index: codingKey.stringValue.startIndex, uniquingKeysWith: { _, _ in throw Error.duplicateKey})
         }
         
     }
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        if let codingOptions = encoder.userInfo[WebAPICodingOptions.key] as? WebAPICodingOptions {
-            switch codingOptions.version {
-            case .v1:
-                try root?._inOrderVisit({ _, key, node in
-                    guard
-                        let value = node.value
-                    else { return }
-                    
-                    let codingKey = CodingKeys(stringValue: key)!
-                    try container.encode(value, forKey: codingKey)
-                })
-            }
-        } else {
-            try container.encodeIfPresent(root, forKey: CodingKeys.rootKey)
-        }
+        try root?._inOrderVisit({ _, key, node in
+            guard
+                let value = node.value
+            else { return }
+            
+            let codingKey = CodingKeys(stringValue: key)!
+            try container.encode(value, forKey: codingKey)
+        })
     }
     
 }

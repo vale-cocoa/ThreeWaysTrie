@@ -90,7 +90,18 @@ extension ThreeWaysTrie {
 // MARK: - Equatable confromance
 extension ThreeWaysTrie: Equatable where Value: Equatable {
     public static func == (lhs: ThreeWaysTrie, rhs: ThreeWaysTrie) -> Bool {
-        lhs.root == rhs.root
+        guard
+            lhs.root !== rhs.root
+        else { return true }
+        
+        guard lhs.count == rhs.count else { return false }
+        
+        for (lhsElement, rhsElement) in zip(lhs, rhs) where (lhsElement.key != rhsElement.key || lhsElement.value != rhsElement.value) {
+            
+            return false
+        }
+        
+        return true
     }
     
 }
@@ -98,7 +109,11 @@ extension ThreeWaysTrie: Equatable where Value: Equatable {
 // MARK: - Hashable conformance
 extension ThreeWaysTrie: Hashable where Value: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(root)
+        hasher.combine(count)
+        for (key, value) in self {
+            hasher.combine(key)
+            hasher.combine(value)
+        }
     }
     
 }

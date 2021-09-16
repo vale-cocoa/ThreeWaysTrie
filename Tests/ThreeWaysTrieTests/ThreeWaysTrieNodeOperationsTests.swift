@@ -279,7 +279,7 @@ final class ThreeWaysTrieNodeOperationsTests: XCTestCase {
         let expectedNode = sut.root!._clone()
         
         let result = sut._remove(node: sut.root, key: key, index: key.startIndex)
-        XCTAssertEqual(result.nodeAfterRemoval, expectedNode)
+        assertAreEqualNodes(lhs: result.nodeAfterRemoval, rhs: expectedNode)
         XCTAssertNil(result.oldValue)
     }
     
@@ -293,7 +293,7 @@ final class ThreeWaysTrieNodeOperationsTests: XCTestCase {
             XCTAssertEqual(result.oldValue, expectedValue)
             sut.root = result.nodeAfterRemoval
             let n = sut._get(node: sut.root, key: key, index: key.startIndex)
-            XCTAssertNil(n)
+            XCTAssertNil(n?.value)
             if expectedValue < keys.indices.last! {
                 // we should also check for side effects not happening,
                 // thus trie still has other keys and values still stored
@@ -894,7 +894,7 @@ final class ThreeWaysTrieNodeOperationsTests: XCTestCase {
     func testTraverseInPreOrder_whenRootIsNotNil_thenVisitsNodesInPreOrderMidLeftRight() {
         let keys = givenKeys()
         try! whenContainsKeys(from: keys)
-        let expectedResult = ["she", "sells", "seashells", "seashore", "by", "the"]
+        let expectedResult = ["she", "shoreline", "sells", "seashells", "by", "the"]
         var result: Array<String> = []
         sut._traverse(traversal: .preOrder, { _, prefix, node in
             guard
