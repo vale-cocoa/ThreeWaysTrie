@@ -1,3 +1,3 @@
-# ThreeWayTrie
+# ThreeWaysTrie
 
 A description of this package.
