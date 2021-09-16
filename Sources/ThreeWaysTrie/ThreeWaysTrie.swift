@@ -36,9 +36,18 @@ public struct ThreeWaysTrie<Value> {
 // MARK: - Trie specific operations
 extension ThreeWaysTrie {
     public func keys(with prefix: String) -> [String] {
-        weak var n = prefix.isEmpty ? root : _get(node: root, key: prefix, index: prefix.startIndex)
         var result: Array<String> = []
-        _forEach(node: n, prefix: prefix, body: {
+        guard !prefix.isEmpty else {
+            _forEach(node: root, body: { result.append($0.key) })
+            
+            return result
+        }
+        
+        weak var n = _get(node: root, key: prefix, index: prefix.startIndex)
+        if n?.value != nil {
+            result.append(prefix)
+        }
+        _forEach(node: n?.mid, prefix: prefix, body: {
             result.append($0.key)
         })
         

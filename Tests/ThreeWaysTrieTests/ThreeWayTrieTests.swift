@@ -42,6 +42,12 @@ final class ThreeWaysTrieTests: XCTestCase {
         sut.root = sut._put(node: sut.root, key: key, value: 1, index: key.startIndex, uniquingKeysWith: { _, _ in fatalError() })
     }
     
+    func whenIsNotEmpty() {
+        for (value, key) in givenKeys().enumerated() {
+            sut.root = sut._put(node: sut.root, key: key, value: value, index: key.startIndex, uniquingKeysWith: { _, latest in latest })
+        }
+    }
+    
     // MARK: - Tests
     func testInit() {
         sut = ThreeWaysTrie()
@@ -50,6 +56,7 @@ final class ThreeWaysTrieTests: XCTestCase {
         XCTAssertNil(sut.root)
     }
     
+    // MARK: - _makeUnique() tests
     func testMakeUnique_whenRootIsNil_thenRootStaysNil() throws {
         try XCTSkipIf(sut.root != nil, "Root must be nil for this test")
         
@@ -73,6 +80,54 @@ final class ThreeWaysTrieTests: XCTestCase {
         sut._makeUnique()
         XCTAssertFalse(sut.root === cp.root)
         XCTAssertEqual(sut.root, cp.root)
+    }
+    
+    // MARK: - keys(with:) tests
+    func testKeysWith_whenIsEmpty_thenReturnsEmptyArray() {
+        let result = sut.keys(with: "")
+        XCTAssertTrue(result.isEmpty)
+    }
+    
+    func testKeysWith_whenIsNotEmptyAndPrefixIsEmpty_thenReturnsAllTrieKeys() {
+        whenIsNotEmpty()
+        var allKeys: Array<String> = []
+        sut._forEach(node: sut.root, body: { allKeys.append($0.key) })
+        
+        let result = sut.keys(with: "")
+        XCTAssertEqual(result, allKeys)
+    }
+    
+    func testKeysWith_whenIsNotEmptyAndPrefixIsNotEmpty_thenReturnsKeysWithSpecifiedPrefix() {
+        whenIsNotEmpty()
+        let prefix = "sh"
+        var expectedResult: Array<String> = []
+        sut._forEach(node: sut.root, body: {
+            guard $0.key.hasPrefix(prefix) else { return }
+            expectedResult.append($0.key)
+        })
+        
+        let result = sut.keys(with: prefix)
+        XCTAssertEqual(result, expectedResult)
+    }
+    
+    func testKeysWith_whenIsNotEmptyAndPrefixMatchesKey_thenResultAlsoContainsSuchKey() {
+        whenIsNotEmpty()
+        let prefix = "she"
+        var expectedResult: Array<String> = []
+        sut._forEach(node: sut.root, body: {
+            guard $0.key.hasPrefix(prefix) else { return }
+            expectedResult.append($0.key)
+        })
+        
+        let result = sut.keys(with: prefix)
+        XCTAssertEqual(result, expectedResult)
+    }
+    
+    func testKeysWith_whenIsNotEmptyAndNoKeysInTrieHasSpecifiedPrefix_thenReturnsEmptyArray() {
+        whenIsNotEmpty()
+        let prefix = "qu"
+        let result = sut.keys(with: prefix)
+        XCTAssertTrue(result.isEmpty)
     }
     
 }
