@@ -33,6 +33,41 @@ extension ThreeWaysTrie: BidirectionalCollection, RandomAccessCollection {
     @inline(__always)
     public var endIndex: Int { root?.count ?? 0 }
     
+    @inline(__always)
+    public var first: Element? {
+        var result: Element? = nil
+        root?._inOrderVisit({ stop, key, node in
+            guard
+                let v = node.value
+            else { return }
+            
+            stop = true
+            result = (key, v)
+        })
+        
+        return result
+    }
+    
+    @inline(__always)
+    public var last: Element? {
+        var result: Element? = nil
+        root?._reverseInOrderVisit({ stop, key, node in
+            guard
+                let v = node.value
+            else { return }
+            
+            stop = true
+            result = (key, v)
+        })
+        
+        return result
+    }
+    
+    @inlinable
+    public func index(after i: Int) -> Int {
+        i + 1
+    }
+    
     @inlinable
     public func formIndex(after i: inout Int) {
         i += 1
@@ -56,6 +91,7 @@ extension ThreeWaysTrie: BidirectionalCollection, RandomAccessCollection {
     
     public func firstIndex(where predicate: (Element) throws -> Bool) rethrows -> Index? {
         var idx = -1
+        var found = false
         try _traverse(traversal: .inOrder, { stop, key, node in
             guard
                 let v = node.value
@@ -63,13 +99,15 @@ extension ThreeWaysTrie: BidirectionalCollection, RandomAccessCollection {
             
             idx += 1
             stop = try predicate((key, v))
+            found = stop
         })
         
-        return startIndex..<endIndex ~= idx ? idx : nil
+        return found ? idx : nil
     }
     
     public func lastIndex(where predicate: (Element) throws -> Bool) rethrows -> Index? {
         var idx = count
+        var found = false
         try _traverse(traversal: .reverseInOrder, { stop, key, node in
             guard
                 let v = node.value
@@ -77,9 +115,10 @@ extension ThreeWaysTrie: BidirectionalCollection, RandomAccessCollection {
             
             idx -= 1
             stop = try predicate((key, v))
+            found = stop
         })
         
-        return startIndex..<endIndex ~= idx ? idx : nil
+        return found ? idx : nil
     }
     
 }
