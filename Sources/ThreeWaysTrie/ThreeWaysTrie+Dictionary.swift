@@ -156,7 +156,7 @@ extension ThreeWaysTrie {
         return ThreeWaysTrie<T>(root: mappedRoot)
     }
     
-    public func filter(_ isIncluded: (Dictionary<Key, Value>.Element) throws -> Bool) rethrows -> Self
+    public func filter(_ isIncluded: (Self.Element) throws -> Bool) rethrows -> Self
     {
         let filteredRoot = try _filter(node: root?._clone(), by: isIncluded)
         

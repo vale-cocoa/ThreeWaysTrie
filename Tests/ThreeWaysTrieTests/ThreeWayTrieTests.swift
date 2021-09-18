@@ -58,6 +58,7 @@ final class ThreeWaysTrieTests: BaseTrieTestClass {
     // MARK: - keys(with:) tests
     func testKeysWith_whenIsEmpty_thenReturnsEmptyArray() throws {
         try XCTSkipIf(sut.root != nil, "Trie must be empty for this test")
+        
         let result = sut.keys(with: "")
         XCTAssertTrue(result.isEmpty)
     }
