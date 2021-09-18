@@ -23,6 +23,7 @@ import Foundation
 public struct ThreeWaysTrie<Value> {
     internal var root: Node? = nil
     
+    @usableFromInline
     internal mutating func _makeUnique() {
         if !isKnownUniquelyReferenced(&root) {
             root = root?._clone()
@@ -87,7 +88,7 @@ extension ThreeWaysTrie {
     
 }
 
-// MARK: - Equatable confromance
+// MARK: - Equatable conformance
 extension ThreeWaysTrie: Equatable where Value: Equatable {
     public static func == (lhs: ThreeWaysTrie, rhs: ThreeWaysTrie) -> Bool {
         guard
@@ -96,9 +97,13 @@ extension ThreeWaysTrie: Equatable where Value: Equatable {
         
         guard lhs.count == rhs.count else { return false }
         
-        for (lhsElement, rhsElement) in zip(lhs, rhs) where (lhsElement.key != rhsElement.key || lhsElement.value != rhsElement.value) {
-            
-            return false
+        for rank in 0..<lhs.count {
+            let (lKey, lValue) = lhs._select(node: lhs.root, rank: rank)!
+            let (rKey, rValue) = rhs._select(node: rhs.root, rank: rank)!
+            guard
+                lKey == rKey,
+                lValue == rValue
+            else { return false }
         }
         
         return true

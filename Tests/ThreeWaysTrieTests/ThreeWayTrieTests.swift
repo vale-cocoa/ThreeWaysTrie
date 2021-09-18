@@ -169,10 +169,122 @@ final class ThreeWaysTrieTests: BaseTrieTestClass {
     }
     
     // MARK: - rank(_:) tests
+    func testRank_whenIsEmpty_thenReturnsZero() throws {
+        try XCTSkipIf(sut.root != nil, "Trie must be empty for this test")
+        
+        for key in givenKeys() {
+            XCTAssertEqual(sut.rank(of: key), 0)
+        }
+    }
+    
+    func testRank_whenIsNotEmptyAndKeyIsInTrie_thenReturnsIndexOfKeyInAllTrieKeysSorted() {
+        let keys = givenKeys()
+        let sortedKeys = keys.sorted()
+        whenIsNotEmpty()
+        for (expectedRank, key) in sortedKeys.enumerated() {
+            XCTAssertEqual(sut.rank(of: key), expectedRank)
+        }
+    }
+    
+    func testRank_whenIsNotEmptyAndKeyIsSmallerThanSmallestKeyInTrie_thenReturnsZero() {
+        whenIsNotEmpty()
+        let key = "at"
+        XCTAssertEqual(sut.rank(of: key), 0)
+    }
+    
+    func testRank_whenIsNotEmptyAndKeyIsLargerThanLargestKeyInTrie_thenReturnsValueEqualsToTrieCount() {
+        whenIsNotEmpty()
+        let key = "zoe"
+        XCTAssertEqual(sut.rank(of: key), sut.count)
+    }
+    
+    func testRank_whenIsnotEmptyAndKeyIsNotInTrie_thenReturnsIndexOfInsertionInTrieKeysSorted() {
+        whenIsNotEmpty()
+        let sortedKeys = givenKeys().sorted()
+        let newKeys = sortedKeys.map({ $0 + "z" })
+        for key in newKeys {
+            let expectedResult = (sortedKeys as NSArray).index(of: key, inSortedRange: NSRange(0..<sortedKeys.count), options: .insertionIndex, usingComparator: {
+                ($0 as! String).compare($1 as! String)
+            })
+            XCTAssertEqual(sut.rank(of: key), expectedResult)
+        }
+    }
     
     // MARK: - floor(_:) tests
+    func testFloor_whenIsEmpty_thenReturnsNil() throws {
+        try XCTSkipIf(sut.root != nil, "Trie must be empty for this test")
+        
+        for key in givenKeys() {
+            XCTAssertNil(sut.floor(key))
+        }
+    }
+    
+    func testFloor_whenIsNotEmptyAndKeyIsInTrie_thenReturnsKey() {
+        whenIsNotEmpty()
+        for key in givenKeys() {
+            XCTAssertEqual(sut.floor(key), key)
+        }
+    }
+    
+    func testFloor_whenIsNotEmptyAndKeyIsSmallerThanSmallestKeyInTrie_thenReturnsNil() {
+        whenIsNotEmpty()
+        let key = "be"
+        XCTAssertNil(sut.floor(key))
+    }
+    
+    func testFloor_whenIsNotEmptyAndKeyIsLargerThanLargestKeyInTire_thenReturnsLargestKeyInTrie() {
+        whenIsNotEmpty()
+        let sortedKeys = givenKeys().sorted()
+        let key = "to"
+        XCTAssertEqual(sut.floor(key), sortedKeys.last)
+    }
+    
+    func testFloor_whenIsNotEmptyAndKeyIsBetweenTwoKeysInTrie_thenReturnsTheSmallestOfTheTwoKeysInTrie() {
+        whenIsNotEmpty()
+        let sortedKeys = givenKeys().sorted()
+        for expectedKey in sortedKeys.dropLast() {
+            let key = expectedKey + "z"
+            XCTAssertEqual(sut.floor(key), expectedKey)
+        }
+    }
     
     // MARK: - ceiling(_:) tests
+    func testCeiling_whenISempty_thenReturnsNil() throws {
+        try XCTSkipIf(sut.root != nil, "Trie must be empty for this test")
+        
+        for key in givenKeys() {
+            XCTAssertNil(sut.ceiling(key))
+        }
+    }
+    
+    func testCeiling_whenIsNotEmptyAndKeyIsInTrie_thenReturnsKey() {
+        whenIsNotEmpty()
+        for key in givenKeys() {
+            XCTAssertEqual(sut.ceiling(key), key)
+        }
+    }
+    
+    func testCeiling_whenIsNotEmptyAndKeyIsLargerThanLargestKeyInTrie_thenReturnsNil() {
+        whenIsNotEmpty()
+        let key = "to"
+        XCTAssertNil(sut.ceiling(key))
+    }
+    
+    func testCeiling_whenIsNotEmptyAndKeyIsSmallerThanSmallestKeyInTrie_thenReturnsSmallestKeyInTrie() {
+        whenIsNotEmpty()
+        let sortedKeys = givenKeys().sorted()
+        let key = "be"
+        XCTAssertEqual(sut.ceiling(key), sortedKeys.first)
+    }
+    
+    func testCeiling_whenIsNotEmptyAndKeyIsBetweenTwoKeysInTrie_thenReturnsTheLargerOfTheTwoKeysInTrie() {
+        whenIsNotEmpty()
+        let sortedKeys = givenKeys().sorted()
+        for expectedKey in sortedKeys.dropFirst() {
+            let key = String(expectedKey.dropLast())
+            XCTAssertEqual(sut.ceiling(key), expectedKey)
+        }
+    }
     
     // MARK: - Equatable conformance tests
     func testEquatable() {
