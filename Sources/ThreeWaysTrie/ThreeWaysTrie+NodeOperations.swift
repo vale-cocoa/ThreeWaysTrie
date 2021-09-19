@@ -196,17 +196,19 @@ extension ThreeWaysTrie {
         if c < nodeChar {
             
             return _rankForExistingKey(node: node?.left, key: key, index:index)
-        } else if
-            c > nodeChar,
-            let rRank = _rankForExistingKey(node: node?.right, key: key, index: index)
-        {
+        } else if c > nodeChar {
+            guard
+                let rRank = _rankForExistingKey(node: node?.right, key: key, index: index)
+            else { return nil }
+            
             let r = (node?.value != nil ? 1 : 0) + (node?.mid?.count ?? 0) + (node?.left?.count ?? 0)
             
             return r + rRank
-        } else if
-            index < key.index(before: key.endIndex),
-            let mRank = _rankForExistingKey(node: node?.mid, key: key, index: key.index(after: index))
-        {
+        } else if index < key.index(before: key.endIndex) {
+            guard
+                let mRank = _rankForExistingKey(node: node?.mid, key: key, index: key.index(after: index))
+            else { return nil }
+            
             let r = (node?.value != nil ? 1 : 0) + (node?.left?.count ?? 0)
             
             return r + mRank

@@ -66,7 +66,7 @@ extension ThreeWaysTrie {
             _check(key)
             _makeUnique()
             if let v = newValue {
-                root = _put(node: root, key: key, value: v, index: key.startIndex, uniquingKeysWith: { _, latest in latest })
+                root = _put(node: root, key: key, value: v, index: key.startIndex, uniquingKeysWith: { $1 })
             } else {
                 root = _remove(node: root, key: key, index: key.startIndex).nodeAfterRemoval
             }
@@ -95,7 +95,9 @@ extension ThreeWaysTrie {
     }
     
     public func index(forKey key: Key) -> Int? {
-        _rankForExistingKey(node: root, key: key, index: key.startIndex)
+        _check(key)
+        
+        return _rankForExistingKey(node: root, key: key, index: key.startIndex)
     }
     
     @discardableResult
