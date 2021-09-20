@@ -23,10 +23,10 @@ import XCTest
 
 let someError = NSError(domain: "com.vdl.threewaystrie", code: 1, userInfo: nil)
 
-fileprivate let malformedJSON: [String : Any] = [
-    "char" : "" as Any,
-    "value" : 1 as Any,
-    "count" : 1 as Any,
+let malformedJSON: [String : Any] = [
+    "key1" : 2 as Any,
+    "key2" : 3 as Any,
+    "" : 1 as Any,
 ]
 
 func givenKeys() -> Array<String> {

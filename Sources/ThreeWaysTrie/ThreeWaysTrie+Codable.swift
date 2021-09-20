@@ -22,9 +22,8 @@ import Foundation
 
 extension ThreeWaysTrie: Codable where Value: Codable {
     public enum Error: Swift.Error {
-        case duplicateKey
-        
         case emptyKey
+        
     }
     
     fileprivate struct CodingKeys: CodingKey {
@@ -54,7 +53,7 @@ extension ThreeWaysTrie: Codable where Value: Codable {
             else { throw Error.emptyKey }
             
             let value = try container.decode(Value.self, forKey: codingKey)
-            self.root = try self._put(node: self.root, key: codingKey.stringValue, value: value, index: codingKey.stringValue.startIndex, uniquingKeysWith: { _, _ in throw Error.duplicateKey})
+            self.root = self._put(node: self.root, key: codingKey.stringValue, value: value, index: codingKey.stringValue.startIndex, uniquingKeysWith: { _, _ in preconditionFailure("Keys must be unique.") })
         }
         
     }
