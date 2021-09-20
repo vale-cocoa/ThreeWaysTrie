@@ -151,3 +151,33 @@ final class WrappedValue: NSCopying {
     }
     
 }
+
+struct TestingSequence<T>: Sequence {
+    init(_ elements: [T], hasContiguousStorage: Bool = true) {
+        self._elements = elements
+        self.hasContiguousStorage = hasContiguousStorage
+    }
+    
+    private let _elements: [T]
+    var hasContiguousStorage: Bool
+    
+    typealias Element = T
+    
+    var underestimatedCount: Int { _elements.count }
+    
+    func makeIterator() -> AnyIterator<T> {
+        AnyIterator(_elements.makeIterator())
+    }
+    
+    func withContiguousStorageIfAvailable<R>(_ body: (UnsafeBufferPointer<T>) throws -> R) rethrows -> R? {
+        var result: R? = nil
+        guard
+            hasContiguousStorage
+        else { return result }
+        
+        try _elements.withUnsafeBufferPointer({ result = try body($0) })
+        
+        return result
+    }
+    
+}

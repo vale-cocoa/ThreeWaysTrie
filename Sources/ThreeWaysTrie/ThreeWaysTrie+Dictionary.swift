@@ -105,10 +105,10 @@ extension ThreeWaysTrie {
         _check(key)
         _makeUnique()
         var oldValue: Value? = nil
-        root = _put(node: root, key: key, value: value, index: key.startIndex, uniquingKeysWith: { older, latest in
-            oldValue = older
+        root = _put(node: root, key: key, value: value, index: key.startIndex, uniquingKeysWith: {
+            oldValue = $0
             
-            return latest
+            return $1
         })
         
         return oldValue
