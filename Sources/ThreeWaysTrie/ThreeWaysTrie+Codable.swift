@@ -31,8 +31,6 @@ extension ThreeWaysTrie: Codable where Value: Codable {
         
         let intValue: Int?
         
-        static var rootKey: CodingKeys { Self(stringValue: "trieRootNode")! }
-        
         init?(stringValue: String) {
             self.stringValue = stringValue
             self.intValue = Int(stringValue)
