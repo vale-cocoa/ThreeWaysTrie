@@ -148,73 +148,6 @@ extension ThreeWaysTrie.Node {
 
 // MARK: - floor and ceiling operations
 extension ThreeWaysTrie.Node {
-    /*
-    internal func _floor(key: String, index: String.Index, prefix: String = "") -> String? {
-        let c = key[index]
-        if c < char {
-            
-            return left?._floor(key: key, index: index, prefix: prefix)
-        }
-        
-        if
-            c > char,
-            let rResult = right?._floor(key: key, index: index, prefix: prefix)
-        {
-            
-            return rResult
-        }
-        
-        let nextPrefix = prefix + String(char)
-        if
-            index < key.index(before: key.endIndex),
-            let midResult = mid?._floor(key: key, index: key.index(after: index), prefix: nextPrefix)
-        {
-            
-            return midResult
-        }
-        if value != nil {
-            
-            return nextPrefix
-        }
-        
-        // mid is supposed not to be nil at this point otherwise this is
-        // a termination node without a value set which is not allowed
-        return mid!._floor(key: key + String(mid!.char), index: key.index(after: index), prefix: nextPrefix)
-    }
-    */
-    internal func _ceiling(key: String, index: String.Index, prefix: String = "") -> String? {
-        let c = key[index]
-        if c > char {
-            
-            return right?._ceiling(key: key, index: index, prefix: prefix)
-        }
-        if
-            c < char,
-            let lResult = left?._ceiling(key: key, index: index, prefix: prefix)
-        {
-            
-            return lResult
-        }
-        
-        let nextPrefix = prefix + String(char)
-        if
-            index < key.index(before: key.endIndex),
-            let midResult = mid?._ceiling(key: key, index: key.index(after: index), prefix: nextPrefix)
-        {
-            
-            return midResult
-        }
-        
-        if value != nil {
-            
-            return nextPrefix
-        }
-        
-        // mid is supposed not to be nil at this point otherwise this is
-        // a termination node without a value set which is not allowed
-        return mid!._ceiling(key: key + String(mid!.char), index: key.index(after: index), prefix: nextPrefix)
-    }
-    
     internal func _floor(key: String, index: String.Index, prefix: String = "") -> String? {
         let c = key[index]
         if c < char { return left?._floor(key: key, index: index, prefix: prefix) }
@@ -231,13 +164,17 @@ extension ThreeWaysTrie.Node {
             let midResult = mid?._floor(key: key, index: key.index(after: index), prefix: nextPrefix)
         { return midResult }
         
-        if value != nil {
-            
-            return nextPrefix
-        }
+        // Either we've reached the key's last character or we couldn't find a floor key
+        // in the right sub-trie.
+        // Thus if this node resolves to a key we return it, cause either the given key is
+        // a key in the trie or is larger than the key this node resolves to:
+        if value != nil { return nextPrefix }
         
+        // …otherwise we ought keep going to eventually find it:
         var floorKey: String? = nil
         if c > char {
+            // We couldn't find a smaller key in the right-subtrie, thus the floor key
+            // is the largest one in the mid subtrie:
             mid?._reverseInOrderVisit(prefix: nextPrefix, { stop, k, node in
                 guard node.value != nil else { return }
                 
@@ -245,6 +182,11 @@ extension ThreeWaysTrie.Node {
                 floorKey = k
             })
         } else {
+            // The given key is a prefix of one contained in the mid
+            // sub-trie of this node (we are at the last char of the key here),
+            // thus the floor key is the greatest one in the left sub-trie
+            // (if we can't go left any further then the given key is smaller than
+            // the smallest cointaned key and we return nil):
             left?._reverseInOrderVisit(prefix: prefix, { stop, k, node in
                 guard
                     node.value != nil
@@ -256,6 +198,54 @@ extension ThreeWaysTrie.Node {
         }
         
         return floorKey
+    }
+    
+    internal func _ceiling(key: String, index: String.Index, prefix: String = "") -> String? {
+        let c = key[index]
+        if c > char { return right?._ceiling(key: key, index: index, prefix: prefix) }
+        
+        if
+            c < char,
+            let lResult = left?._ceiling(key: key, index: index, prefix: prefix)
+        { return lResult }
+        
+        let nextPrefix = prefix + String(char)
+        if
+            c == char,
+            index < key.index(before: key.endIndex)
+        { return mid?._ceiling(key: key, index: key.index(after: index), prefix: nextPrefix) }
+        
+        // Either we've reached the key's last character or we couldn't find a ceiling
+        // key in the left sub-trie.
+        // Thus if this node resolves to a key we return it, cause either the given key
+        // is contianed in the trie or is smaller than the one this node resolves to
+        if value != nil { return nextPrefix }
+        
+        // …otherwise we ought keep going to eventually find it:
+        var ceilingKey: String? = nil
+        if c < char {
+            // We couldn't find a key greater than or equal to the given one
+            // in the left sub-trie, thus the ceiling key is the smallest one in the
+            // mid-subtrie:
+            mid?._inOrderVisit(prefix: nextPrefix, { stop, k, node in
+                guard node.value != nil else { return }
+                
+                stop = true
+                ceilingKey = k
+            })
+        } else {
+            // The given key is a prefix of the smallest key in the mid sub-trie
+            // (we are at the given key's last char here),
+            // thus that would be the ceiling key:
+            mid?._preOrderVisit(prefix: nextPrefix, { stop, k, node in
+                guard node.value != nil else { return }
+                
+                stop = true
+                ceilingKey = k
+            })
+        }
+        
+        return ceilingKey
     }
     
 }

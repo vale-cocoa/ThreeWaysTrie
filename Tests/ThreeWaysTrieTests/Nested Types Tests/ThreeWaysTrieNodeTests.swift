@@ -443,6 +443,17 @@ final class ThreeWaysTrieNodeTests: XCTestCase {
         }
     }
     
+    func testCeiling_whenPrefixOfKeyMatchesPartialOfIncludedKey_thenReturnsIncludedKeyWithMatchingPrefix(){
+        let keys = givenKeys()
+        try! whenContainsKeys(from: keys)
+        
+        let sortedKeys = keys.sorted()
+        let keysToCeil = ["biology", "seashelling", "seldom", "sharing", "shopping", "than"]
+        for (key, expectedResult) in zip(keysToCeil, sortedKeys) {
+            XCTAssertEqual(sut._ceiling(key: key, index: key.startIndex), expectedResult, "key to ceil: \(key)")
+        }
+    }
+    
 }
 
 
