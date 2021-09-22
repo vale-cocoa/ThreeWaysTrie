@@ -217,6 +217,7 @@ extension ThreeWaysTrie {
         return _rank(node: root, key: key, index: key.startIndex)
     }
     
+    
     public func floor(_ key: Key) -> Key? {
         _check(key)
         

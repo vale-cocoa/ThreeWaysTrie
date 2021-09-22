@@ -31,7 +31,7 @@ Aside for offering the same functionalities of a swift dictionary, a trie also o
 
 ### Looking-up keys with a specific prefix via `keys(with:)` instance method
 Use this method to look-up for keys in a trie instance that begin with the given `prefix` string parameter. 
-The complexity for this operation is O(*k*) where *k* is the number of keys matching the given prefix.
+The complexity for this operation is O(*k*) where *k* is the number of keys included in the trie matching the given prefix.
 
 The following example show the usage of this method:
 ``` Swift
@@ -57,7 +57,7 @@ Note that to obtain all keys in a trie instance it is better to use its `keys` p
 ### Looking-up keys matching a pattern via `keys(matching:)` instance method 
 `ThreeWaysTrie` instances can look-up for stored keys matching a *pattern* via `keys(matching:)` instance method.  
 This method accepts a non-empty string value representing a *pattern* for looking up keys; such pattern can also contain the `.` character representing a *wildcard* element: that is when the given pattern contains one or more `.` character, then any key character at those positions will match the pattern.
-Pattern matching on keys operation has a complexity of O(*k*), where *k* is the count of keys matching the specified pattern.
+Pattern matching on keys operation has a complexity of O(*k*), where *k* is the count of keys included in the trie matching the specified pattern.
 
 The following example shows the usage of this method:
 ```Swift
@@ -118,3 +118,47 @@ The following example shows the usage of this method:
 ```
 
 Note that specifying an empty key will trigger a run-time error.
+
+### Get the included key equal or immediately before a given one via `floor(key:)` instance method
+The floor operation on a key can be done via the instance method `floor(key:)`, which accepts as its parameter a non-empty string value, and returns an optional value that would be the key included in the trie equal or immediately before the specified one. If such key doesn't exist in the trie, then this method will return `nil`.
+The overall complexity of this operation is O(log *k*) where *k* is number of keys included in the trie less than or equal to the specified one.
+In the following example the usage of this method is shown:
+```Swift
+        let wordsCount: ThreeWaysTrie<Int> = [
+        "she" : 1,
+        "sells" : 1,
+        "seashells" : 1,
+        "by" : 1,
+        "the" : 1,
+        "shoreline" : 1
+    ]
+    
+    if let k = wordsCount.floor(key: "she") {
+        print(k)
+    } else {
+        print("no key smaller than or equal to 'she'")
+    }
+    // Prints: "she"
+    
+    if let k = wordsCount.floor(key: "bio") {
+        print(k)
+    } else {
+        print("no key smaller than or equal to 'bio'")
+    }
+    // Prints: "no key smaller than or equal to 'bio'"
+    
+    if let k = wordsCount.floor(key: "those") {
+        print(k)
+    } else {
+        print("no key smaller than or equal to 'those'")
+    }+
+    // Prints: "the"
+```
+
+### Get the included key equal or immediately after a given one via `ceiling(key:)` instance method
+The ceil operation on a key can be done via the instance method `ceiling(key:)`, which accepts as its parameter a non-empty string value, and returns an optional value that would be the key included in the trie equal or immediately after the specified one. If such key doesn't exist in the trie, then this method will return `nil`.
+The overall complexity of this operation is O(log *k*) where *k* is number of keys included in the trie greater than or equal to the specified one.
+In the following example the usage of this method is shown:
+```Swift
+
+```

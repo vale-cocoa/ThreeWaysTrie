@@ -148,6 +148,7 @@ extension ThreeWaysTrie.Node {
 
 // MARK: - floor and ceiling operations
 extension ThreeWaysTrie.Node {
+    /*
     internal func _floor(key: String, index: String.Index, prefix: String = "") -> String? {
         let c = key[index]
         if c < char {
@@ -176,11 +177,11 @@ extension ThreeWaysTrie.Node {
             return nextPrefix
         }
         
-        // mid is supposed not be nil at this point otherwise this is
+        // mid is supposed not to be nil at this point otherwise this is
         // a termination node without a value set which is not allowed
         return mid!._floor(key: key + String(mid!.char), index: key.index(after: index), prefix: nextPrefix)
     }
-    
+    */
     internal func _ceiling(key: String, index: String.Index, prefix: String = "") -> String? {
         let c = key[index]
         if c > char {
@@ -209,9 +210,52 @@ extension ThreeWaysTrie.Node {
             return nextPrefix
         }
         
-        // mid is supposed not be nil at this point otherwise this is
+        // mid is supposed not to be nil at this point otherwise this is
         // a termination node without a value set which is not allowed
         return mid!._ceiling(key: key + String(mid!.char), index: key.index(after: index), prefix: nextPrefix)
+    }
+    
+    internal func _floor(key: String, index: String.Index, prefix: String = "") -> String? {
+        let c = key[index]
+        if c < char { return left?._floor(key: key, index: index, prefix: prefix) }
+        
+        if
+            c > char,
+            let rResult = right?._floor(key: key, index: index, prefix: prefix)
+        { return rResult }
+        
+        let nextPrefix = prefix + String(char)
+        if
+            c == char,
+            index < key.index(before: key.endIndex),
+            let midResult = mid?._floor(key: key, index: key.index(after: index), prefix: nextPrefix)
+        { return midResult }
+        
+        if value != nil {
+            
+            return nextPrefix
+        }
+        
+        var floorKey: String? = nil
+        if c > char {
+            mid?._reverseInOrderVisit(prefix: nextPrefix, { stop, k, node in
+                guard node.value != nil else { return }
+                
+                stop = true
+                floorKey = k
+            })
+        } else {
+            left?._reverseInOrderVisit(prefix: prefix, { stop, k, node in
+                guard
+                    node.value != nil
+                else { return }
+                
+                stop = true
+                floorKey = k
+            })
+        }
+        
+        return floorKey
     }
     
 }

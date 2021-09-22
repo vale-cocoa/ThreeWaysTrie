@@ -399,6 +399,17 @@ final class ThreeWaysTrieNodeTests: XCTestCase {
         }
     }
     
+    func testFloor_whenKeyIsAPrefixOfAContainedKey_thenReturnsTheContainedKeyImmediatetlyBeforeThanTheOneWithSuchPrefix() {
+        let keys = givenKeys()
+        try! whenContainsKeys(from: keys)
+        let sortedKeys = keys.sorted()
+        for idx in sortedKeys.indices.dropLast() {
+            let key = String(sortedKeys[idx + 1].dropLast())
+            let expectedKey = sortedKeys[idx]
+            XCTAssertEqual(sut._floor(key: key, index: key.startIndex), expectedKey, "key to floor: \(key)")
+        }
+    }
+    
     // MARK: - _ceiling(key:index:prefix:) tests
     func testCeiling_whenKeyIsLargerThanLargestKeyInTrieRootedAtNode_thenReturnsNil() {
         let keys = givenKeys()
