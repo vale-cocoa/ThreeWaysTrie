@@ -96,6 +96,40 @@ extension ThreeWaysTrie: BidirectionalCollection, RandomAccessCollection {
         i -= 1
     }
     
+    /// Accesses the key-value pair at the specified position.
+    ///
+    /// This subscript takes an index into the trie, instead of a key, and
+    /// returns the corresponding key-value pair as a tuple. When performing
+    /// collection-based operations that return an index into a trie, use
+    /// this subscript with the resulting value.
+    ///
+    /// For example, to find the key for a particular value in a trie, use
+    /// the `firstIndex(where:)` method.
+    ///
+    ///     let countryCodes: ThreeWaysTrie<String> = [
+    ///         "BR": "Brazil",
+    ///         "GH": "Ghana",
+    ///         "JP": "Japan"
+    ///     ]
+    ///     if let index = countryCodes.firstIndex(where: { $0.value == "Japan" }) {
+    ///         print(countryCodes[index])
+    ///         print("Japan's country code is '\(countryCodes[index].key)'.")
+    ///     } else {
+    ///         print("Didn't find 'Japan' as a value in the trie.")
+    ///     }
+    ///     // Prints "(key: "JP", value: "Japan")"
+    ///     // Prints "Japan's country code is 'JP'."
+    ///
+    /// - Parameter position:   The position of the key-value pair to access.
+    ///                         `position` must be a valid index of the trie
+    ///                          and not equal to `endIndex`.
+    /// - Returns:  A two-element tuple with the key and value corresponding to
+    ///             `position`.
+    ///
+    /// - Complexity:   O(log *n*), where *n* is the lenght of the trie.
+    ///                 Although that would be the worst-case scenario, commonly
+    ///                 the complexity of the postion subscript operation would
+    ///                 be close to O(1).
     public subscript(position: Int) -> Element {
         precondition(0..<endIndex ~= position, "Index out of bounds")
         
