@@ -21,6 +21,8 @@
 import Foundation
 
 extension ThreeWaysTrie: Sequence {
+    // The element type of a trie: a tuple containing an individual
+    /// key-value pair.
     public typealias Element = (key: Key, value: Value)
     
     public struct Iterator: IteratorProtocol {

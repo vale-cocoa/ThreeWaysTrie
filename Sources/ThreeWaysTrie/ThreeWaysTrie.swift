@@ -49,7 +49,7 @@ import Foundation
 /// ```
 ///
 /// Non-empty `String` values must be used as trie's keys. An attempt to use an empty `String` value as a key will
-/// trigger a run-time error.
+/// trigger a runtime error.
 public struct ThreeWaysTrie<Value> {
     internal var root: Node? = nil
     
@@ -161,7 +161,7 @@ extension ThreeWaysTrie {
     /// - Returns:  An array containing all stored keys matching the specified pattern.
     /// - Complexity:   O(*k*) where *k* is the number of keys matching the specified pattern.
     /// - Warning:  The specified `pattern` string value **must not be empty**,
-    ///              otherwise a run-time error will occur.
+    ///              otherwise a runtime error will occur.
     public func keys(matching pattern: String) -> [String] {
         guard
             !pattern.isEmpty
@@ -211,7 +211,7 @@ extension ThreeWaysTrie {
     ///             elements sorted by their key.
     /// - Complexity:   O(log *n*), where *n* is the lenght of the trie.
     /// - Warning:  The string value specified as `key` parameter **must not be empty**,
-    ///             otherwise a run-time error will occur.
+    ///             otherwise a runtime error will occur.
     public func rank(of key: String) -> Int {
         _check(key)
         
@@ -220,7 +220,7 @@ extension ThreeWaysTrie {
     
     /// Returns the key included in the trie equal or immediately before the specified one.
     /// If the specified key is smaller than the smallest key included in this trie, then
-    /// returns `nil`. The specified key must not be empty or a run-time error will occur.
+    /// returns `nil`. The specified key must not be empty or a runtime error will occur.
     ///
     /// The following example shows how this method works:
     /// ```Swift
@@ -267,7 +267,7 @@ extension ThreeWaysTrie {
     ///             before the specified one; `nil` if such key doesn't exists in this trie.
     /// - Complexity:   O(*k*), where *k* is the count of keys included in this trie that are smaller than the
     ///                 specified one.
-    /// - Warning: When the specified key is an empty `String` value, then a run-time error occurs.
+    /// - Warning: When the specified key is an empty `String` value, then a runtime error occurs.
     public func floor(_ key: Key) -> Key? {
         _check(key)
         
@@ -276,7 +276,7 @@ extension ThreeWaysTrie {
     
     /// Returns the key included in the trie equal or immediately after the specified one.
     /// If the specified key is larger than the largest key included in this trie, then
-    /// returns `nil`. The specified key must not be empty or a run-time error will occur.
+    /// returns `nil`. The specified key must not be empty or a runtime error will occur.
     ///
     /// The following example shows how this method works:
     /// ```Swift
@@ -330,7 +330,7 @@ extension ThreeWaysTrie {
     ///             after the specified one; `nil` if such key doesn't exists in this trie.
     /// - Complexity:   O(*k*), where *k* is the count of keys included in this trie that are larger than the
     ///                 specified one.
-    /// - Warning: When the specified key is an empty `String` value, then a run-time error occurs.
+    /// - Warning: When the specified key is an empty `String` value, then a runtime error occurs.
     public func ceiling(_ key: Key) -> Key? {
         _check(key)
         

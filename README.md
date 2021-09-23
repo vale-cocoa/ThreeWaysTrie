@@ -23,7 +23,7 @@ To create a trie with no key-value pairs, either use an empty dictionary literal
     var anotherEmptyTrie = ThreeWaysTrie<Int>()
 ```
 
-Non-empty `String` values must be used as trie's keys. An attempt to use an empty `String` value as a key will trigger a run-time error.
+Non-empty `String` values must be used as trie's keys. An attempt to use an empty `String` value as a key will trigger a runtime error.
 
 
 ## Keys look-up operations
