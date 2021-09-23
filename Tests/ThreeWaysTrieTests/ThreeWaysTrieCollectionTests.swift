@@ -125,6 +125,45 @@ final class ThreeWaysTrieCollectionTests: BaseTrieTestClass {
         }
     }
     
+    func testIndexOffSetBy() {
+        let array: Array<Any> = []
+        for idx in 0..<10 {
+            for distance in 0..<10 {
+                XCTAssertEqual(sut.index(idx, offsetBy: distance), array.index(idx, offsetBy: distance))
+                XCTAssertEqual(sut.index(idx, offsetBy: -distance), array.index(idx, offsetBy: -distance))
+            }
+        }
+    }
+    
+    func testIndexOffsetByLimitedBy() {
+        let array: Array<Any> = []
+        for idx in 0...10 {
+            for limit in stride(from: 10, through: 0, by: -1) {
+                for distance in 0...10 {
+                    XCTAssertEqual(sut.index(idx, offsetBy: distance, limitedBy: limit), array.index(idx, offsetBy: distance, limitedBy: limit))
+                    XCTAssertEqual(sut.index(idx, offsetBy: distance, limitedBy: -limit), array.index(idx, offsetBy: distance, limitedBy: -limit))
+                    XCTAssertEqual(sut.index(idx, offsetBy: -distance, limitedBy: limit), array.index(idx, offsetBy: -distance, limitedBy: limit))
+                    XCTAssertEqual(sut.index(idx, offsetBy: -distance, limitedBy: -limit), array.index(idx, offsetBy: -distance, limitedBy: -limit))
+                    
+                    XCTAssertEqual(sut.index(idx, offsetBy: limit, limitedBy: distance), array.index(idx, offsetBy: limit, limitedBy: distance))
+                    XCTAssertEqual(sut.index(idx, offsetBy: limit, limitedBy: -distance), array.index(idx, offsetBy: limit, limitedBy: -distance))
+                    XCTAssertEqual(sut.index(idx, offsetBy: -limit, limitedBy: distance), array.index(idx, offsetBy: -limit, limitedBy: distance))
+                    XCTAssertEqual(sut.index(idx, offsetBy: -limit, limitedBy: -distance), array.index(idx, offsetBy: -limit, limitedBy: -distance))
+                }
+            }
+        }
+    }
+    
+    func testDistance() {
+        let array: Array<Any> = []
+        for start in 0...10 {
+            for end in stride(from: 10, through: 0, by: -1) {
+                XCTAssertEqual(sut.distance(from: start, to: end), array.distance(from: start, to: end))
+                XCTAssertEqual(sut.distance(from: end, to: start), array.distance(from: end, to: start))
+            }
+        }
+    }
+    
     func testSubscript() {
         whenIsNotEmpty()
         let sortedElements = sut!.map({ $0 })
