@@ -96,6 +96,27 @@ extension ThreeWaysTrie: BidirectionalCollection, RandomAccessCollection {
         i -= 1
     }
     
+    @inlinable
+    public func index(_ i: Int, offsetBy distance: Int) -> Int {
+        i + distance
+    }
+
+    @inlinable
+    public func index(_ i: Int, offsetBy distance: Int, limitedBy limit: Int) -> Int? {
+        let l = limit - i
+        if distance > 0 ? l >= 0 && l < distance : l <= 0 && distance < l {
+        
+            return nil
+        }
+        
+        return i + distance
+    }
+
+    @inlinable
+    public func distance(from start: Int, to end: Int) -> Int {
+        end - start
+    }
+    
     /// Accesses the key-value pair at the specified position.
     ///
     /// This subscript takes an index into the trie, instead of a key, and
