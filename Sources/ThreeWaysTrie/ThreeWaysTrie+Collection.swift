@@ -21,6 +21,19 @@
 import Foundation
 
 extension ThreeWaysTrie: BidirectionalCollection, RandomAccessCollection {
+    /// The position of a key-value pair in a trie.
+    ///
+    /// `ThreeWaysTrie` has two subscripting interfaces:
+    ///
+    /// 1. Subscripting with a key, yielding an optional value:
+    ///
+    ///        v = d[k]!
+    ///
+    /// 2. Subscripting with an index, yielding a key-value pair:
+    ///
+    ///        (k, v) = d[i]
+    public typealias Index = Int
+    
     @inline(__always)
     public var count: Int { root?.count ?? 0 }
         
@@ -119,6 +132,36 @@ extension ThreeWaysTrie: BidirectionalCollection, RandomAccessCollection {
         })
         
         return found ? idx : nil
+    }
+    
+    /// Removes and returns the first key-value pair of the trie if the
+    /// trie isn't empty.
+    ///
+    /// The first element of the trie is always the one with the smallest key;
+    /// that is a trie keeps its elements sorted by its keys' values.
+    ///
+    /// - Returns:  The first key-value pair of the trie if the trie
+    ///              is not empty; otherwise, `nil`.
+    @inlinable
+    public mutating func popFirst() -> Element? {
+        guard !isEmpty else { return nil }
+        
+        return remove(at: startIndex)
+    }
+    
+    /// Removes and returns the last key-value pair of the trie if the
+    /// trie isn't empty.
+    ///
+    /// The last element of the trie is always the one with the largest key;
+    /// that is a trie keeps its elements sorted by its keys' values.
+    ///
+    /// - Returns:  The last key-value pair of the trie if the trie
+    ///              is not empty; otherwise, `nil`.
+    @inlinable
+    public mutating func popLast() -> Element? {
+        guard !isEmpty else { return nil }
+        
+        return remove(at: endIndex - 1)
     }
     
 }

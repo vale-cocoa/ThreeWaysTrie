@@ -25,6 +25,7 @@ extension ThreeWaysTrie: Sequence {
     /// key-value pair.
     public typealias Element = (key: Key, value: Value)
     
+    /// An iterator over the members of a `ThreeWaysTrie<Value>`.
     public struct Iterator: IteratorProtocol {
         private let _trie: ThreeWaysTrie
         
@@ -181,6 +182,19 @@ extension ThreeWaysTrie {
             else { return }
             
             result.append($0)
+        })
+        
+        return result
+    }
+    
+    public func reversed() -> Array<Self.Element> {
+        var result: Array<Self.Element> = []
+        root?._reverseInOrderVisit({_, key, node in
+            guard
+                let v = node.value
+            else { return }
+            
+            result.append((key, v))
         })
         
         return result

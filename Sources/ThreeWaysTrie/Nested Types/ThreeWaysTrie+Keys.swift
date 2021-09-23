@@ -21,6 +21,7 @@
 import Foundation
 
 extension ThreeWaysTrie {
+    /// A view of a trie's keys.
     public struct Keys: BidirectionalCollection, RandomAccessCollection, Equatable {
         fileprivate let _trie: ThreeWaysTrie
         
@@ -72,6 +73,26 @@ extension ThreeWaysTrie {
         
     }
     
+    /// A collection containing just the keys of the trie.
+    ///
+    /// When iterated over, keys appear in this collection in the same order as
+    /// they occur in the trie's key-value pairs. Each key in the keys
+    /// collection has a unique value.
+    ///
+    ///     let countryCodes: ThreeWaysTrie<String> = [
+    ///         "BR": "Brazil",
+    ///         "GH": "Ghana",
+    ///         "JP": "Japan"
+    ///     ]
+    ///     print(countryCodes)
+    ///     // Prints "["BR": "Brazil", "GH": "Ghana", "JP": "Japan",]"
+    ///
+    ///     for k in countryCodes.keys {
+    ///         print(k)
+    ///     }
+    ///     // Prints "BR"
+    ///     // Prints "GH"
+    ///     // Prints "JP"
     @inline(__always)
     public var keys: Keys { Keys(self) }
     
