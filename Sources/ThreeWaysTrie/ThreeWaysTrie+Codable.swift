@@ -21,7 +21,9 @@
 import Foundation
 
 extension ThreeWaysTrie: Codable where Value: Codable {
+    /// Error thrown by `ThreeWaysTrie`
     public enum Error: Swift.Error {
+        /// Error thrown when an empty string value is found for a key.
         case emptyKey
         
     }
