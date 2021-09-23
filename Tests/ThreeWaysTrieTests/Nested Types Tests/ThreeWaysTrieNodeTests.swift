@@ -448,6 +448,8 @@ final class ThreeWaysTrieNodeTests: XCTestCase {
         try! whenContainsKeys(from: keys)
         
         let sortedKeys = keys.sorted()
+        // "she sells seashells by the shoreline" ->
+        // ["by", "seashells", "sells", "she", "shoreline", "the"]
         let keysToCeil = ["biology", "seashelling", "seldom", "sharing", "shopping", "than"]
         for (key, expectedResult) in zip(keysToCeil, sortedKeys) {
             XCTAssertEqual(sut._ceiling(key: key, index: key.startIndex), expectedResult, "key to ceil: \(key)")

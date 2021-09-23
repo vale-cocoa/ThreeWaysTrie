@@ -127,34 +127,34 @@ extension ThreeWaysTrie {
     ///
     /// The following example shows the usage of this method:
     /// ```Swift
-    ///     let wordsCount: ThreeWaysTrie<Int> = [
-    ///         "she" : 1,
-    ///         "sells" : 1,
-    ///         "seashells" : 1,
-    ///         "by" : 1,
-    ///         "the" : 1,
-    ///         "shoreline" : 1
-    ///     ]
-    ///     var pattern = "s........"
-    ///     var matchedKeys = wordsCount.keys(matching: pattern)
-    ///     print(matchedKeys)
-    ///     // Prints: ["seashells", "shoreline"]
+    /// let wordsCount: ThreeWaysTrie<Int> = [
+    ///     "she" : 1,
+    ///     "sells" : 1,
+    ///     "seashells" : 1,
+    ///     "by" : 1,
+    ///     "the" : 1,
+    ///     "shoreline" : 1
+    /// ]
+    /// var pattern = "s........"
+    /// var matchedKeys = wordsCount.keys(matching: pattern)
+    /// print(matchedKeys)
+    /// // Prints: ["seashells", "shoreline"]
     ///
-    ///     pattern = ".he"
-    ///     matchedKeys = wordsCount.keys(matching: pattern)
-    ///     print(matchedKeys)
-    ///     // Prints: ["she", "the"]
+    /// pattern = ".he"
+    /// matchedKeys = wordsCount.keys(matching: pattern)
+    /// print(matchedKeys)
+    /// // Prints: ["she", "the"]
     ///
-    ///     // Note that key must also match the lenght of the given pattern:
-    ///     pattern = "se......."
-    ///     matchedKeys = wordsCount.keys(matching: pattern)
-    ///     print(matchedKeys)
-    ///     // Prints: ["seashells"]
-    ///     // key "sells" is not included in the result cause it matches the pattern only
-    ///     // up to its lenght which is less than the lenght of the pattern:
-    ///     // pattern:     se.......
-    ///     // matching:    ^^^^^----
-    ///     // key:         sells
+    /// // Note that key must also match the lenght of the given pattern:
+    /// pattern = "se......."
+    /// matchedKeys = wordsCount.keys(matching: pattern)
+    /// print(matchedKeys)
+    /// // Prints: ["seashells"]
+    /// // key "sells" is not included in the result cause it matches the pattern only
+    /// // up to its lenght which is less than the lenght of the pattern:
+    /// // pattern:     se.......
+    /// // matching:    ^^^^^----
+    /// // key:         sells
     /// ```
     ///
     /// - Parameter pattern:    A string value that would be the pattern to match for returned keys.
@@ -185,22 +185,23 @@ extension ThreeWaysTrie {
     ///
     ///  The following example shows the usage of this method:
     /// ```Swift
-    ///     let wordsCount: ThreeWaysTrie<Int> = [
-    ///         "she" : 1,
-    ///         "sells" : 1,
-    ///         "seashells" : 1,
-    ///         "by" : 1,
-    ///         "the" : 1,
-    ///         "shoreline" : 1
-    ///     ]
-    ///     print(wordsCount.rank(of: "she"))
-    ///     // Prints: 3
+    /// let wordsCount: ThreeWaysTrie<Int> = [
+    ///     "she" : 1,
+    ///      "sells" : 1,
+    ///      "seashells" : 1,
+    ///       "by" : 1,
+    ///       "the" : 1,
+    ///       "shoreline" : 1
+    /// ]
     ///
-    ///     print(wordsCount.rank(of: "biology"))
-    ///     // Prints: 0
+    /// print(wordsCount.rank(of: "she"))
+    /// // Prints: 3
     ///
-    ///     print(wordsCount.rank(of: "those"))
-    ///     // Prints: 6
+    /// print(wordsCount.rank(of: "biology"))
+    /// // Prints: 0
+    ///
+    /// print(wordsCount.rank(of: "those"))
+    /// // Prints: 6
     /// ```
     ///
     /// - Parameter key:    A string value representing the key to look-up for its sort index.
@@ -217,13 +218,119 @@ extension ThreeWaysTrie {
         return _rank(node: root, key: key, index: key.startIndex)
     }
     
-    
+    /// Returns the key included in the trie equal or immediately before the specified one.
+    /// If the specified key is smaller than the smallest key included in this trie, then
+    /// returns `nil`. The specified key must not be empty or a run-time error will occur.
+    ///
+    /// The following example shows how this method works:
+    /// ```Swift
+    /// let wordsCount: ThreeWaysTrie<Int> = [
+    ///     "she" : 1,
+    ///     "sells" : 1,
+    ///     "seashells" : 1,
+    ///     "by" : 1,
+    ///     "the" : 1,
+    ///     "shoreline" : 1
+    /// ]
+    ///
+    /// if let k = wordsCount.floor(key: "she") {
+    /// print(k)
+    /// } else {
+    ///     print("no included key is smaller than or equal to 'she'")
+    /// }
+    /// // Prints: "she"
+    ///
+    /// if let k = wordsCount.floor(key: "those") {
+    ///    print(k)
+    /// } else {
+    ///    print("no included key is smaller than or equal to 'those'")
+    /// }
+    ///    // Prints: "the"
+    ///
+    /// if let k = wordsCount.floor(key: "shore") {
+    ///    print(k)
+    /// } else {
+    ///     print("No included key is smaller than or equal to 'shore'")
+    /// }
+    /// // Prints: "she"
+    ///
+    /// if let k = wordsCount.floor(key: "bio") {
+    ///     print(k)
+    /// } else {
+    ///     print("no included key is smaller than or equal to 'bio'")
+    /// }
+    /// // Prints: "no included key is smaller than or equal to 'bio'"
+    /// ```
+    ///
+    /// - Parameter key: A `String` value, **must not be empty**.
+    /// - Returns:  An optional `String` value representing the key included in this trie that is equal or immediately
+    ///             before the specified one; `nil` if such key doesn't exists in this trie.
+    /// - Complexity:   O(*k*), where *k* is the count of keys included in this trie that are smaller than the
+    ///                 specified one.
+    /// - Warning: When the specified key is an empty `String` value, then a run-time error occurs.
     public func floor(_ key: Key) -> Key? {
         _check(key)
         
         return root?._floor(key: key, index: key.startIndex)
     }
     
+    /// Returns the key included in the trie equal or immediately after the specified one.
+    /// If the specified key is larger than the largest key included in this trie, then
+    /// returns `nil`. The specified key must not be empty or a run-time error will occur.
+    ///
+    /// The following example shows how this method works:
+    /// ```Swift
+    /// let wordsCount: ThreeWaysTrie<Int> = [
+    ///     "she" : 1,
+    ///     "sells" : 1,
+    ///     "seashells" : 1,
+    ///     "by" : 1,
+    ///     "the" : 1,
+    ///     "shoreline" : 1
+    /// ]
+    ///
+    /// if let k = wordsCount.ceiling(key: "than") {
+    ///     print(k)
+    /// } else {
+    ///     print("No included key is larger than or equal to 'than'")
+    /// }
+    /// // Prints: "the"
+    ///
+    /// if let k = wordsCount.ceiling(key: "anchor") {
+    ///     print(k)
+    /// } else {
+    ///     print("No included key is larger than or equal to 'anchor'")
+    /// }
+    /// // Prints: "by"
+    ///
+    /// if let k = wordsCount.ceiling(key: "sells") {
+    ///     print(k)
+    /// } else {
+    ///     print("No included key is larger than or equal to 'sells'")
+    /// }
+    /// // Prints: "sells"
+    ///
+    /// if let k = wordsCount.ceiling(key: "sea") {
+    ///     print(k)
+    /// } else {
+    ///     print("No included key is larger than or equal to 'sea'")
+    /// }
+    /// // Prints: "seashells"
+    ///
+    /// if let k = wordsCount.ceiling(key: "thus") {
+    ///     print(k)
+    /// } else {
+    ///     print("No included key is larger than or equal to 'thus'")
+    /// }
+    /// // Prints: "No included key is larger than or equal to 'thus'"
+    /// ```
+    ///
+    /// - Parameter key: A `String` value, **must not be empty**.
+    /// - Returns:  An optional `String` value representing the key included in this trie that is equal or immediately
+    ///             after the specified one; `nil` if such key doesn't exists in this trie.
+    /// - Complexity:   O(*k*), where *k* is the count of keys included in this trie that are larger than the
+    ///                 specified one.
+    /// - Warning: When the specified key is an empty `String` value, then a run-time error occurs.
     public func ceiling(_ key: Key) -> Key? {
         _check(key)
         

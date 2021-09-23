@@ -136,29 +136,100 @@ In the following example the usage of this method is shown:
     if let k = wordsCount.floor(key: "she") {
         print(k)
     } else {
-        print("no key smaller than or equal to 'she'")
+        print("no included key is smaller than or equal to 'she'")
+    }
+    // Prints: "she"
+    
+    if let k = wordsCount.floor(key: "those") {
+        print(k)
+    } else {
+        print("no included key is smaller than or equal to 'those'")
+    }
+    // Prints: "the"
+    
+    if let k = wordsCount.floor(key: "shore") {
+        print(k)
+    } else {
+        print("No included key is smaller than or equal to 'shore'")
     }
     // Prints: "she"
     
     if let k = wordsCount.floor(key: "bio") {
         print(k)
     } else {
-        print("no key smaller than or equal to 'bio'")
+        print("no included key is smaller than or equal to 'bio'")
     }
-    // Prints: "no key smaller than or equal to 'bio'"
-    
-    if let k = wordsCount.floor(key: "those") {
-        print(k)
-    } else {
-        print("no key smaller than or equal to 'those'")
-    }+
-    // Prints: "the"
+    // Prints: "no included key is smaller than or equal to 'bio'"
 ```
+
+Note that specifying an empty key will trigger a run-time error.
 
 ### Get the included key equal or immediately after a given one via `ceiling(key:)` instance method
 The ceil operation on a key can be done via the instance method `ceiling(key:)`, which accepts as its parameter a non-empty string value, and returns an optional value that would be the key included in the trie equal or immediately after the specified one. If such key doesn't exist in the trie, then this method will return `nil`.
 The overall complexity of this operation is O(log *k*) where *k* is number of keys included in the trie greater than or equal to the specified one.
 In the following example the usage of this method is shown:
 ```Swift
-
+        let wordsCount: ThreeWaysTrie<Int> = [
+        "she" : 1,
+        "sells" : 1,
+        "seashells" : 1,
+        "by" : 1,
+        "the" : 1,
+        "shoreline" : 1
+    ]
+    
+    if let k = wordsCount.ceiling(key: "than") {
+        print(k)
+    } else {
+        print("No included key is larger than or equal to 'than'")
+    }
+    // Prints: "the"
+    
+    if let k = wordsCount.ceiling(key: "anchor") {
+        print(k)
+    } else {
+        print("No included key is larger than or equal to 'anchor'")
+    }
+    // Prints: "by"
+    
+    if let k = wordsCount.ceiling(key: "sells") {
+        print(k)
+    } else {
+        print("No included key is larger than or equal to 'sells'")
+    }
+    // Prints: "sells"
+    
+    if let k = wordsCount.ceiling(key: "sea") {
+        print(k)
+    } else {
+        print("No included key is larger than or equal to 'sea'")
+    }
+    // Prints: "seashells"
+    
+    if let k = wordsCount.ceiling(key: "thus") {
+        print(k)
+    } else {
+        print("No included key is larger than or equal to 'thus'")
+    }
+    // Prints: "No included key is larger than or equal to 'thus'"
 ```
+
+Note that specifying an empty key will trigger a run-time error.
+
+
+## Dictionary operations
+`ThreeWaysTrie` offers the same public interface of a Swift `Dictionary`, excepts for methods relating to the `capacity`: that is due of the way the underlaying buffer is designed (nodes), there is no contiguous memory buffer to reallocate/keep: 
+* The `Dictionary` method `removeAll(keepingCapacity:)` for `ThreeWaysTrie` has the signature `removeAll()`, not accepting any parameter.
+* The `Dictionary` method `reserveCapacity(_:)` is not present in the `ThreeWaysTrie` public interface. 
+* The `Dictionary` property `capacity` doesn't exists in the `ThreeWaysTrie` public interface.
+* The `Dictionary` initalizer `init(minimumCapacity:)` doesnt' exists in the `ThreeWaysTroe` public interface.
+* The `Sequence` implementation of `withContiguousStorageIfAvailable(_:)` always returns a `nil` result.
+
+
+## Collection conformance notes
+`ThreeWaysTrie` conforms to Swift `Collection`, `BidirectionalCollection` and `RandomAccessCollection` protcols. There is a cavaet though for those protocols implementations: index based subscripts are not O(1) operations but rather have a O(log *n*) complexity (where *n* is the lenght of the trie instance).
+`ThreeWaysTrie` adopts `Int` as its `Index` type, leveraging internally on the *rank* and *select* operations mutuated from ternary search trees. 
+Thus even though the worst scenario for those operations are O(log *n*), their common performance is usually better, almost O(1).
+
+Since the `Index` type is `Int`, indices can be moved at any distance and measuring the distance between them can be done with a O(1) complexity, plus the `count` property on `ThreeWaysTrie` also has a O(1) complexity. Therefore `RandomAccessCollection` requirements are fullfilled as well as `BidirectionalCollection` too are.
+
