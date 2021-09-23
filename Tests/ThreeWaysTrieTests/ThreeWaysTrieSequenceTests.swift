@@ -673,4 +673,13 @@ final class ThreeWaysTrieSequenceTests: BaseTrieTestClass {
         }
     }
     
+    func testReversed() {
+        whenIsNotEmpty()
+        let expectedResult = givenKeys()
+            .enumerated().sorted(by: { $0.element > $1.element })
+            .map({ (key: $0.element, value: $0.offset) })
+        let reversed = sut.reversed()
+        XCTAssertTrue(reversed.elementsEqual(expectedResult, by: { $0.key == $1.key && $0.value == $1.value }))
+    }
+    
 }

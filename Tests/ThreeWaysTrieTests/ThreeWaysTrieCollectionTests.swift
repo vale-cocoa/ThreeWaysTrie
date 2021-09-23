@@ -246,4 +246,45 @@ final class ThreeWaysTrieCollectionTests: BaseTrieTestClass {
         }
     }
     
+    // MARK: - popFirst() tests
+    func testPopFirst_whenIsEmpty_thenReturnsNil() throws {
+        try XCTSkipIf(!sut.isEmpty, "Trie must be emptt for this test")
+        
+        XCTAssertNil(sut.popFirst())
+    }
+    
+    func testPopFirst_whenIsNotEmpty_thenRemovesAndReturnsFirstElementInTrie() {
+        whenIsNotEmpty()
+        for _ in 0..<sut.endIndex {
+            let expectedElement = sut[sut.startIndex]
+            let prevCount = sut.count
+            
+            let element = sut.popFirst()
+            XCTAssertEqual(element?.key, expectedElement.key)
+            XCTAssertEqual(element?.value, expectedElement.value)
+            XCTAssertEqual(sut.count, prevCount - 1)
+            XCTAssertNil(sut[expectedElement.key])
+        }
+    }
+    
+    // MARK: - popLast() tests
+    func testPopLast_whenIsEmpty_thenReturnsNil() throws {
+        try XCTSkipIf(!sut.isEmpty, "Trie must be emptt for this test")
+        
+        XCTAssertNil(sut.popLast())
+    }
+    
+    func testPopLast_whenIsNotEmpty_thenRemovesAndReturnsLastElementInTrie() {
+        whenIsNotEmpty()
+        for lastIdx in stride(from: (sut.endIndex - 1), through: 0, by: -1) {
+            let expectedElement = sut[lastIdx]
+            let prevCount = sut.count
+            
+            let element = sut.popLast()
+            XCTAssertEqual(element?.key, expectedElement.key)
+            XCTAssertEqual(element?.value, expectedElement.value)
+            XCTAssertEqual(sut.count, prevCount - 1)
+            XCTAssertNil(sut[expectedElement.key])
+        }
+    }
 }
