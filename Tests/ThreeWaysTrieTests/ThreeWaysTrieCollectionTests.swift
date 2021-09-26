@@ -132,33 +132,23 @@ final class ThreeWaysTrieCollectionTests: BaseTrieTestClass {
     }
     
     func testIndexOffsetByLimitedBy() {
-        // when idx shifted by distance goes beyond limit,
-        // then returns nil:
         let idx = Int.random(in: 0...100)
-        var distance = Int.random(in: 0...100)
-        var shifted = idx + distance
-        var lo = min(idx - 1, shifted)
-        var hi = max(idx - 1, shifted)
-        var limit = Int.random(in: lo..<hi)
-        XCTAssertNil(sut.index(idx, offsetBy: distance, limitedBy: limit))
-        
-        distance = Int.random(in: -100..<0)
-        shifted = idx + distance
-        lo = min(idx - 1, shifted)
-        hi = max(idx - 1, shifted)
-        limit = Int.random(in: lo...hi)
-        XCTAssertNil(sut.index(idx, offsetBy: distance, limitedBy: limit), "idx: \(idx)\ndistance: \(distance)\nlimit: \(limit)")
-        
-        // when idx shifted by distance doesn't go beyond limit,
-        // then returns such value:
-        distance = Int.random(in: 0...100)
-        limit = idx + distance + 1
-        for offset in 0...distance {
-            shifted = idx + offset
-            XCTAssertEqual(sut.index(idx, offsetBy: offset, limitedBy: limit), shifted, "idx: \(idx)\ndistance: \(offset)\nlimit: \(limit)")
+        let maxDistance = Int.random(in: 1...100)
+        for offset in 1...maxDistance {
+            // When offsetting goes beyond limit then returns nil
+            var limit = idx + offset - 1
+            XCTAssertNil(sut.index(idx, offsetBy: offset, limitedBy: limit), "idx: \(idx)\noffset: \(offset)\nlimit: \(limit)")
+            limit = idx - offset + 1
+            XCTAssertNil(sut.index(idx, offsetBy: -offset, limitedBy: limit), "idx: \(idx)\noffset: \(-offset)\nlimit: \(limit)")
             
-            shifted = idx - offset
-            XCTAssertEqual(sut.index(idx, offsetBy: -offset, limitedBy: -limit), shifted, "idx: \(idx)\ndistance: \(-offset)\nlimit: \(-limit)")
+            // when offsetting doesn't exceeds limit, then returns index + offset:
+            var expectedResult = idx + offset
+            limit = idx + maxDistance
+            XCTAssertEqual(sut.index(idx, offsetBy: offset, limitedBy: limit), expectedResult)
+            
+            expectedResult = idx - offset
+            limit = idx - maxDistance
+            XCTAssertEqual(sut.index(idx, offsetBy: -offset, limitedBy: limit), expectedResult)
         }
     }
     
