@@ -133,6 +133,12 @@ final class ThreeWaysTrieCollectionTests: BaseTrieTestClass {
     
     func testIndexOffsetByLimitedBy() {
         let idx = Int.random(in: 0...100)
+        
+        // when offset is 0 then always return same index:
+        for limit in -100...100 {
+            XCTAssertEqual(sut.index(idx, offsetBy: 0, limitedBy: limit), idx)
+        }
+        
         let maxDistance = Int.random(in: 1...100)
         for offset in 1...maxDistance {
             // When offsetting goes beyond limit then returns nil
@@ -141,7 +147,7 @@ final class ThreeWaysTrieCollectionTests: BaseTrieTestClass {
             limit = idx - offset + 1
             XCTAssertNil(sut.index(idx, offsetBy: -offset, limitedBy: limit), "idx: \(idx)\noffset: \(-offset)\nlimit: \(limit)")
             
-            // when offsetting doesn't exceeds limit, then returns index + offset:
+            // when offsetting doesn't exceeds limit, then returns index shifted by offset:
             var expectedResult = idx + offset
             limit = idx + maxDistance
             XCTAssertEqual(sut.index(idx, offsetBy: offset, limitedBy: limit), expectedResult)
