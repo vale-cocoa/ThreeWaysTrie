@@ -126,42 +126,46 @@ final class ThreeWaysTrieCollectionTests: BaseTrieTestClass {
     }
     
     func testIndexOffSetBy() {
-        let array: Array<Any> = []
-        for idx in 0..<10 {
-            for distance in 0..<10 {
-                XCTAssertEqual(sut.index(idx, offsetBy: distance), array.index(idx, offsetBy: distance))
-                XCTAssertEqual(sut.index(idx, offsetBy: -distance), array.index(idx, offsetBy: -distance))
-            }
-        }
+        let idx = Int.random(in: -100...100)
+        let distance = Int.random(in: -100...100)
+        XCTAssertEqual(sut.index(idx, offsetBy: distance), idx + distance)
     }
     
     func testIndexOffsetByLimitedBy() {
-        let array: Array<Any> = []
-        for idx in 0...10 {
-            for limit in stride(from: 10, through: 0, by: -1) {
-                for distance in 0...10 {
-                    XCTAssertEqual(sut.index(idx, offsetBy: distance, limitedBy: limit), array.index(idx, offsetBy: distance, limitedBy: limit))
-                    XCTAssertEqual(sut.index(idx, offsetBy: distance, limitedBy: -limit), array.index(idx, offsetBy: distance, limitedBy: -limit))
-                    XCTAssertEqual(sut.index(idx, offsetBy: -distance, limitedBy: limit), array.index(idx, offsetBy: -distance, limitedBy: limit))
-                    XCTAssertEqual(sut.index(idx, offsetBy: -distance, limitedBy: -limit), array.index(idx, offsetBy: -distance, limitedBy: -limit))
-                    
-                    XCTAssertEqual(sut.index(idx, offsetBy: limit, limitedBy: distance), array.index(idx, offsetBy: limit, limitedBy: distance))
-                    XCTAssertEqual(sut.index(idx, offsetBy: limit, limitedBy: -distance), array.index(idx, offsetBy: limit, limitedBy: -distance))
-                    XCTAssertEqual(sut.index(idx, offsetBy: -limit, limitedBy: distance), array.index(idx, offsetBy: -limit, limitedBy: distance))
-                    XCTAssertEqual(sut.index(idx, offsetBy: -limit, limitedBy: -distance), array.index(idx, offsetBy: -limit, limitedBy: -distance))
-                }
-            }
+        // when idx shifted by distance goes beyond limit,
+        // then returns nil:
+        let idx = Int.random(in: 0...100)
+        var distance = Int.random(in: 0...100)
+        var shifted = idx + distance
+        var lo = min(idx - 1, shifted)
+        var hi = max(idx - 1, shifted)
+        var limit = Int.random(in: lo..<hi)
+        XCTAssertNil(sut.index(idx, offsetBy: distance, limitedBy: limit))
+        
+        distance = Int.random(in: -100..<0)
+        shifted = idx + distance
+        lo = min(idx - 1, shifted)
+        hi = max(idx - 1, shifted)
+        limit = Int.random(in: lo...hi)
+        XCTAssertNil(sut.index(idx, offsetBy: distance, limitedBy: limit), "idx: \(idx)\ndistance: \(distance)\nlimit: \(limit)")
+        
+        // when idx shifted by distance doesn't go beyond limit,
+        // then returns such value:
+        distance = Int.random(in: 0...100)
+        limit = idx + distance + 1
+        for offset in 0...distance {
+            shifted = idx + offset
+            XCTAssertEqual(sut.index(idx, offsetBy: offset, limitedBy: limit), shifted, "idx: \(idx)\ndistance: \(offset)\nlimit: \(limit)")
+            
+            shifted = idx - offset
+            XCTAssertEqual(sut.index(idx, offsetBy: -offset, limitedBy: -limit), shifted, "idx: \(idx)\ndistance: \(-offset)\nlimit: \(-limit)")
         }
     }
     
     func testDistance() {
-        let array: Array<Any> = []
-        for start in 0...10 {
-            for end in stride(from: 10, through: 0, by: -1) {
-                XCTAssertEqual(sut.distance(from: start, to: end), array.distance(from: start, to: end))
-                XCTAssertEqual(sut.distance(from: end, to: start), array.distance(from: end, to: start))
-            }
-        }
+        let start = Int.random(in: 0..<100)
+        let end = Int.random(in: 0..<100)
+        XCTAssertEqual(sut.distance(from: start, to: end), end - start)
     }
     
     func testSubscript() {
@@ -326,4 +330,5 @@ final class ThreeWaysTrieCollectionTests: BaseTrieTestClass {
             XCTAssertNil(sut[expectedElement.key])
         }
     }
+    
 }
